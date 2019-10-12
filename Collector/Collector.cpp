@@ -77,10 +77,14 @@ NTSTATUS CollectorDeviceControl(PDEVICE_OBJECT, PIRP Irp) {
 	auto status = STATUS_SUCCESS;
 
 	switch (stack->Parameters.DeviceIoControl.IoControlCode) {
-	case IOCTL_PRIORITY_COLLECTOR_GET_EVIDENCE:
+	case IOCTL_EVIDENCE_COLLECTOR_GET_PROCESSLIST:
 	{
 		// do the work
 		if (stack->Parameters.DeviceIoControl.InputBufferLength < sizeof(Config)) {
+			status = STATUS_BUFFER_TOO_SMALL;
+			break;
+		}
+		if (stack->Parameters.DeviceIoControl.OutputBufferLength < 0x10000) {
 			status = STATUS_BUFFER_TOO_SMALL;
 			break;
 		}
@@ -90,14 +94,8 @@ NTSTATUS CollectorDeviceControl(PDEVICE_OBJECT, PIRP Irp) {
 			status = STATUS_INVALID_PARAMETER;
 			break;
 		}
-
-		if (data->Process == TRUE) {
-			
-			GetProcessList();
-			break;
-		}
-
-		KdPrint(("ioctl executed."));
+		GetProcessList();
+		KdPrint(("GetProcessList executed."));
 		break;
 	}
 

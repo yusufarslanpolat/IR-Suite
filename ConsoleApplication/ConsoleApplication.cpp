@@ -23,13 +23,16 @@ int main(int argc, const char* argv[]) {
 		return Error("Failed to open device");
 
 	Config data;
-	data.Process = TRUE;
-	
+	//data.Process = TRUE;
+	char OutputBuffer[0x10000];
+	memset(OutputBuffer, 0, sizeof(OutputBuffer));
 
 	DWORD returned;
-	BOOL success = DeviceIoControl(hDevice, IOCTL_PRIORITY_COLLECTOR_GET_EVIDENCE, &data, sizeof(data), nullptr, 0, &returned, nullptr);
-	if (success)
+	BOOL success = DeviceIoControl(hDevice, IOCTL_EVIDENCE_COLLECTOR_GET_PROCESSLIST, &data, sizeof(data), &OutputBuffer, sizeof(OutputBuffer), &returned, nullptr);
+	if (success) {
 		printf("Evidence Collected!\n");
+		printf("OutBuffer (%d): %s\n", returned, OutputBuffer);
+	}
 	else
 		Error("Collecting evidence failed!");
 

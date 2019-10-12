@@ -1,2 +1,2 @@
-cd /d "C:\Users\john\source\repos\IR Suite\Collector" &msbuild "Collector.vcxproj" /t:sdvViewer /p:configuration="Release" /p:platform="x64" /p:SolutionDir="C:\Users\john\source\repos\IR Suite" 
-exit %errorlevel% 
+cd /d "C:\Users\john\source\repos\IR Suite\Collector" &&msbuild "Collector.vcxproj" /t:sdv /p:inputs="/check /devenv" /p:configuration="Release" /p:platform="x64" /p:SolutionDir="C:\Users\john\source\repos\IR Suite" 
+exit 0 
