@@ -105,6 +105,7 @@ extern "C" {
 		irpSp = IoGetCurrentIrpStackLocation(Irp);
 		inBufLength = irpSp->Parameters.DeviceIoControl.InputBufferLength;
 		outBufLength = irpSp->Parameters.DeviceIoControl.OutputBufferLength;
+		auto newdata = ExAllocatePool(NonPagedPool, outBufLength);
 
 		if (!inBufLength || !outBufLength)
 		{
@@ -153,8 +154,11 @@ extern "C" {
 			//
 			// Write to the buffer over-writes the input buffer content
 			//
-
-			RtlCopyBytes(outBuf, data, outBufLength);
+			
+			DbgPrint("\nExAllocatePool");
+			memset(newdata, 0x41, outBufLength);
+			RtlCopyBytes(outBuf, newdata, outBufLength);
+			
 
 			DbgPrint("\tData to User : ");
 			PrintChars(outBuf, datalen);
@@ -164,7 +168,7 @@ extern "C" {
 			// of the Irp and complete the Irp.
 			//
 
-			Irp->IoStatus.Information = (outBufLength < datalen ? outBufLength : datalen);
+			Irp->IoStatus.Information = (outBufLength);
 
 			//
 			// When the Irp is completed the content of the SystemBuffer
@@ -189,7 +193,7 @@ extern "C" {
 		// Finish the I/O operation by simply completing the packet and returning
 		// the same status as in the packet itself.
 		//
-
+		ExFreePool(newdata);
 		Irp->IoStatus.Status = ntStatus;
 
 		IoCompleteRequest(Irp, IO_NO_INCREMENT);

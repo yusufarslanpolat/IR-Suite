@@ -11,7 +11,7 @@ int Error(const char* message) {
 	printf("%s (error=%d)\n", message, GetLastError());
 	return 1;
 }
-char OutputBuffer[100];
+
 char InputBuffer[100];
 int main(int argc, const char* argv[]) {
 	//if (argc < 1) {
@@ -19,6 +19,10 @@ int main(int argc, const char* argv[]) {
 	//	return 0;
 	//}
 
+	auto OutputBuffer = malloc(0x40000);
+	if (!OutputBuffer) {
+		return 0;
+	}
 	BOOL bRc;
 	ULONG bytesReturned;
 	DWORD errNum = 0;
@@ -36,10 +40,10 @@ int main(int argc, const char* argv[]) {
 		// Printing Input & Output buffer pointers and size
 		//
 
-	printf("InputBuffer Pointer = %p, BufLength = %Iu\n", InputBuffer,
-		sizeof(InputBuffer));
-	printf("OutputBuffer Pointer = %p BufLength = %Iu\n", OutputBuffer,
-		sizeof(OutputBuffer));
+	//printf("InputBuffer Pointer = %p, BufLength = %Iu\n", InputBuffer,
+	//	sizeof(InputBuffer));
+	//printf("OutputBuffer Pointer = %p BufLength = %Iu\n", OutputBuffer,
+	//	0x40000);
 	//
 	// Performing METHOD_BUFFERED
 	//
@@ -49,14 +53,14 @@ int main(int argc, const char* argv[]) {
 
 	printf("\nCalling DeviceIoControl METHOD_BUFFERED:\n");
 
-	memset(OutputBuffer, 0, sizeof(OutputBuffer));
+	memset(OutputBuffer, 0, 0x40000);
 
 	bRc = DeviceIoControl(hDevice,
 		(DWORD)IOCTL_EVIDENCE_COLLECTOR_GET_PROCESSLIST,
 		&InputBuffer,
 		(DWORD)strlen(InputBuffer) + 1,
-		&OutputBuffer,
-		sizeof(OutputBuffer),
+		OutputBuffer,
+		0x40000,
 		&bytesReturned,
 		NULL
 	);
@@ -67,9 +71,11 @@ int main(int argc, const char* argv[]) {
 		return GetLastError();
 
 	}
-	printf("    OutBuffer (%d): %s\n", bytesReturned, OutputBuffer);
+	printf("    OutBuffer (%d): %s\n", bytesReturned, (char*)OutputBuffer);
 
 
 	CloseHandle(hDevice);
+	free(OutputBuffer);
+
 }
 
